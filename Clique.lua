@@ -124,6 +124,8 @@ function Clique:Enable()
     end
 end
 
+
+
 -- /run CompactRaidFrameContainer:Hide()
 -- /run CompactRaidFrame2:Hide()
 
