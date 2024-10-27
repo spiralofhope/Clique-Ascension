@@ -23,27 +23,27 @@ function Clique:Enable()
 				[L.CLICKSET_HARMFUL] = {},
 				[L.CLICKSET_HELPFUL] = {},
 				[L.CLICKSET_OOC] = {},
-			},
-			blacklist = {
-			},
-			tooltips = false,
-		},
-        char = {
-            switchSpec = false,
-            downClick = false,
-        },
-	}
+      },
+      blacklist = {
+      },
+      tooltips = false,
+    },
+    char = {
+      switchSpec = false,
+      downClick = false,
+    },
+  }
 	
 	self.db = self:InitializeDB("CliqueDB", self.defaults)
 	self.profile = self.db.profile
 	self.clicksets = self.profile.clicksets
 
-    self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
+  self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
 
 	ClickCastFrames = ClickCastFrames or {}
 	self.ccframes = ClickCastFrames
 
-    local newindex = function(t,k,v)
+  local newindex = function(t,k,v)
 		if v == nil then
 			Clique:UnregisterFrame(k)
 			rawset(self.ccframes, k, nil)
@@ -51,12 +51,12 @@ function Clique:Enable()
 			Clique:RegisterFrame(k)
 			rawset(self.ccframes, k, v)
 		end
-    end
+  end
     
 	ClickCastFrames = setmetatable({}, {__newindex=newindex})
 
-    Clique:OptionsOnLoad()
-    Clique:EnableFrames()
+  Clique:OptionsOnLoad()
+  Clique:EnableFrames()
 
 	-- Register for dongle events
 	self:RegisterMessage("DONGLE_PROFILE_CHANGED")
@@ -67,31 +67,32 @@ function Clique:Enable()
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 
 	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
-    self:RegisterEvent("COMMENTATOR_SKIRMISH_QUEUE_REQUEST")
-    self:RegisterEvent("ADDON_LOADED")
+  self:RegisterEvent("COMMENTATOR_SKIRMISH_QUEUE_REQUEST")
+  self:RegisterEvent("ADDON_LOADED")
 
-    -- Change to correct profile based on talent spec
-    if self.db.char.switchSpec then
-        self.silentProfile = true
-        self.talentGroup = CA_GetActiveSpecId() + 1
-				if self.db.char["spec"..self.talentGroup.."Profile"] then
-					self.db:SetProfile(self.db.char["spec"..self.talentGroup.."Profile"])
-				end
-        self.silentProfile = false
+  -- Change to correct profile based on talent spec
+  if self.db.char.switchSpec then
+    self.silentProfile = true
+    self.talentGroup = CA_GetActiveSpecId() + 1
+    if self.db.char["spec"..self.talentGroup.."Profile"] then
+      self.db:SetProfile(self.db.char["spec"..self.talentGroup.."Profile"])
     end
+    self.silentProfile = false
+  end
 
 	self:UpdateClicks()
 
-    -- Register all frames that snuck in before we did =)
-    for frame in pairs(self.ccframes) do
-		self:RegisterFrame(frame)
-    end
+  -- Register all frames that snuck in before we did =)
+  for frame in pairs(self.ccframes) do
+    self:RegisterFrame(frame)
+  end
 
-    -- Securehook CreateFrame to catch any new raid frames
-    local raidFunc = function(type, name, parent, template)
-		if template == "RaidPulloutButtonTemplate" then
-			ClickCastFrames[getglobal(name.."ClearButton")] = true
-		end
+  -- Securehook CreateFrame to catch any new raid frames
+  local raidFunc = function(type, name, parent, template)
+  if template == "RaidPulloutButtonTemplate" then
+    ClickCastFrames[getglobal(name.."ClearButton")] = true
+  end
+  hooksecurefunc("CreateFrame", raidFunc)
 
 -- MY NEW CODE
 --function Clique:OnEvent( event )
@@ -103,42 +104,43 @@ function Clique:Enable()
 --Clique:RegisterEvent( "RAID_ROSTER_UPDATE" )
 --Clique:SetScript( "OnEvent", Clique.OnEvent )
 
-    self:RegisterEvent( "RAID_ROSTER_UPDATE", "EnableFramesOnRaid" )
-    function Clique:EnableFramesOnRaid()
-      self:EnableFrames()
-    end
+  function Clique:EnableFramesOnRaid()
+    CompactRaidFrameContainer:SetScale( 1.5 )
+    self:EnableFrames()
+  end
+  self:RegisterEvent( "RAID_ROSTER_UPDATE", "EnableFramesOnRaid" )
 
 
-	end
+end  --  function Clique:Enable()
 
-	local oldotsu = GameTooltip:GetScript("OnTooltipSetUnit")
-	if oldotsu then
-		GameTooltip:SetScript("OnTooltipSetUnit", function(...)
-			Clique:AddTooltipLines()
-			return oldotsu(...)
-		end)
-	else
-		GameTooltip:SetScript("OnTooltipSetUnit", function(...)
-			Clique:AddTooltipLines()
-		end)
-	end
-		
-    hooksecurefunc("CreateFrame", raidFunc)
 
-	-- Create our slash command
-	self.cmd = self:InitializeSlashCommand("Clique commands", "CLIQUE", "clique")
-	self.cmd:RegisterSlashHandler("debug - Enables extra messages for debugging purposes", "debug", "ShowAttributes")
-	self.cmd:InjectDBCommands(self.db, "copy", "delete", "list", "reset", "set")
-	self.cmd:RegisterSlashHandler("tooltip - Enables binding lists in tooltips.", "tooltip", "ToggleTooltip")
-	self.cmd:RegisterSlashHandler("showbindings - Shows a window that contains the current bindings", "showbindings", "ShowBindings")
+local oldotsu = GameTooltip:GetScript("OnTooltipSetUnit")
+if oldotsu then
+  GameTooltip:SetScript("OnTooltipSetUnit", function(...)
+    Clique:AddTooltipLines()
+    return oldotsu(...)
+  end)
+else
+  GameTooltip:SetScript("OnTooltipSetUnit", function(...)
+    Clique:AddTooltipLines()
+  end)
+end
 
-	-- Place the Clique tab
-	self:LEARNED_SPELL_IN_TAB()
 
-    -- Register the arena frames, if they're already loaded
-    if IsAddOnLoaded("Blizzard_ArenaUI") then
-        self:EnableArenaFrames()
-    end
+-- Create our slash command
+self.cmd = self:InitializeSlashCommand("Clique commands", "CLIQUE", "clique")
+self.cmd:RegisterSlashHandler("debug - Enables extra messages for debugging purposes", "debug", "ShowAttributes")
+self.cmd:InjectDBCommands(self.db, "copy", "delete", "list", "reset", "set")
+self.cmd:RegisterSlashHandler("tooltip - Enables binding lists in tooltips.", "tooltip", "ToggleTooltip")
+self.cmd:RegisterSlashHandler("showbindings - Shows a window that contains the current bindings", "showbindings", "ShowBindings")
+
+-- Place the Clique tab
+self:LEARNED_SPELL_IN_TAB()
+
+  -- Register the arena frames, if they're already loaded
+  if IsAddOnLoaded("Blizzard_ArenaUI") then
+      self:EnableArenaFrames()
+  end
 
 
 end
@@ -146,78 +148,77 @@ end
 
 -- EDITED
 function Clique:EnableFrames()
-    local tbl = {
-		PlayerFrame,
-		PetFrame,
-		PartyMemberFrame1,
-		PartyMemberFrame2,
-		PartyMemberFrame3,
-		PartyMemberFrame4,
-		PartyMemberFrame1PetFrame,
-		PartyMemberFrame2PetFrame,
-		PartyMemberFrame3PetFrame,
-		PartyMemberFrame4PetFrame,
-		TargetFrame,
-		TargetFrameToT,
-		FocusFrame,
-        FocusFrameToT,
-        Boss1TargetFrame,
-        Boss2TargetFrame,
-        Boss3TargetFrame,
-        Boss4TargetFrame,
-		CompactRaidFrame1, 
-		CompactRaidFrame2, 
-		CompactRaidFrame3, 
-		CompactRaidFrame4,
-		CompactRaidFrame5,
-		CompactRaidFrame6,
-		CompactRaidFrame7,
-		CompactRaidFrame8,
-		CompactRaidFrame9,
-		CompactRaidFrame10,
-		CompactRaidFrame11,
-		CompactRaidFrame12,
-		CompactRaidFrame13,
-		CompactRaidFrame14,
-		CompactRaidFrame15,
-		CompactRaidFrame16,
-		CompactRaidFrame17,
-		CompactRaidFrame18,
-		CompactRaidFrame20,
-		CompactRaidFrame21,
-		CompactRaidFrame22,
-		CompactRaidFrame23,
-		CompactRaidFrame24,
-		CompactRaidFrame25,
-		CompactRaidFrame26,
-		CompactRaidFrame27,
-		CompactRaidFrame28,
-		CompactRaidFrame30,
-		CompactRaidFrame31,
-		CompactRaidFrame32,
-		CompactRaidFrame33,
-		CompactRaidFrame34,
-		CompactRaidFrame35,
-		CompactRaidFrame36,
-		CompactRaidFrame37,
-		CompactRaidFrame38,
-		CompactRaidFrame30,
-		CompactRaidFrame31,
-		CompactRaidFrame32,
-		CompactRaidFrame33,
-		CompactRaidFrame34,
-		CompactRaidFrame35,
-		CompactRaidFrame36,
-		CompactRaidFrame37,
-		CompactRaidFrame38,
-		CompactRaidFrame39,
-		CompactRaidFrame40,
-    }
-    
-    for i,frame in pairs(tbl) do
-		rawset(self.ccframes, frame, true)
-    end
-    CompactRaidFrameContainer:SetScale(1.6)
+  local tbl = {
+    PlayerFrame,
+    PetFrame,
+    PartyMemberFrame1,
+    PartyMemberFrame2,
+    PartyMemberFrame3,
+    PartyMemberFrame4,
+    PartyMemberFrame1PetFrame,
+    PartyMemberFrame2PetFrame,
+    PartyMemberFrame3PetFrame,
+    PartyMemberFrame4PetFrame,
+    TargetFrame,
+    TargetFrameToT,
+    FocusFrame,
+      FocusFrameToT,
+      Boss1TargetFrame,
+      Boss2TargetFrame,
+      Boss3TargetFrame,
+      Boss4TargetFrame,
+    CompactRaidFrame1, 
+    CompactRaidFrame2, 
+    CompactRaidFrame3, 
+    CompactRaidFrame4,
+    CompactRaidFrame5,
+    CompactRaidFrame6,
+    CompactRaidFrame7,
+    CompactRaidFrame8,
+    CompactRaidFrame9,
+    CompactRaidFrame10,
+    CompactRaidFrame11,
+    CompactRaidFrame12,
+    CompactRaidFrame13,
+    CompactRaidFrame14,
+    CompactRaidFrame15,
+    CompactRaidFrame16,
+    CompactRaidFrame17,
+    CompactRaidFrame18,
+    CompactRaidFrame20,
+    CompactRaidFrame21,
+    CompactRaidFrame22,
+    CompactRaidFrame23,
+    CompactRaidFrame24,
+    CompactRaidFrame25,
+    CompactRaidFrame26,
+    CompactRaidFrame27,
+    CompactRaidFrame28,
+    CompactRaidFrame30,
+    CompactRaidFrame31,
+    CompactRaidFrame32,
+    CompactRaidFrame33,
+    CompactRaidFrame34,
+    CompactRaidFrame35,
+    CompactRaidFrame36,
+    CompactRaidFrame37,
+    CompactRaidFrame38,
+    CompactRaidFrame30,
+    CompactRaidFrame31,
+    CompactRaidFrame32,
+    CompactRaidFrame33,
+    CompactRaidFrame34,
+    CompactRaidFrame35,
+    CompactRaidFrame36,
+    CompactRaidFrame37,
+    CompactRaidFrame38,
+    CompactRaidFrame39,
+    CompactRaidFrame40,
+  }
+  
+  for i,frame in pairs(tbl) do
+  rawset(self.ccframes, frame, true)
+  end
 end	   
 
 
@@ -241,16 +242,16 @@ end
 
 
 function Clique:SpellBookButtonPressed(frame, button)
-    local texture = getglobal(frame:GetParent():GetName().."IconTexture"):GetTexture()
-    local name = getglobal(frame:GetParent():GetName().."SpellName"):GetText()
+  local texture = getglobal(frame:GetParent():GetName().."IconTexture"):GetTexture()
+  local name = getglobal(frame:GetParent():GetName().."SpellName"):GetText()
 	local rank = getglobal(frame:GetParent():GetName().."SubSpellName"):GetText()
 
-    if rank == L.RACIAL_PASSIVE or rank == L.PASSIVE then
-		StaticPopup_Show("CLIQUE_PASSIVE_SKILL")
-		return
-    end
-    
-    local type = "spell"
+  if rank == L.RACIAL_PASSIVE or rank == L.PASSIVE then
+    StaticPopup_Show("CLIQUE_PASSIVE_SKILL")
+    return
+  end
+  
+  local type = "spell"
 
 	if self.editSet == self.clicksets[L.CLICKSET_HARMFUL] then
 		button = string.format("%s%d", "harmbutton", self:GetButtonNumber(button))
@@ -265,25 +266,25 @@ function Clique:SpellBookButtonPressed(frame, button)
 		rank = nil
 	end
 
-    -- Build the structure
-    local t = {
-		["button"] = button,
-		["modifier"] = self:GetModifierText(),
-		["texture"] = texture,
-		["type"] = type,
-		["arg1"] = name,
-		["arg2"] = rank,
-    }
+  -- Build the structure
+  local t = {
+    ["button"] = button,
+    ["modifier"] = self:GetModifierText(),
+    ["texture"] = texture,
+    ["type"] = type,
+    ["arg1"] = name,
+    ["arg2"] = rank,
+  }
+  
+  local key = t.modifier .. t.button
+  
+  if self:CheckBinding(key) then
+    StaticPopup_Show("CLIQUE_BINDING_PROBLEM")
+    return
+  end
     
-    local key = t.modifier .. t.button
-    
-    if self:CheckBinding(key) then
-		StaticPopup_Show("CLIQUE_BINDING_PROBLEM")
-	return
-    end
-    
-    self.editSet[key] = t
-    self:ListScrollUpdate()
+  self.editSet[key] = t
+  self:ListScrollUpdate()
 	self:UpdateClicks()
 	-- We can only make changes when out of combat
 	self:PLAYER_REGEN_ENABLED()
@@ -310,40 +311,40 @@ function Clique:UpdateClicks()
 	local harm = self.clicksets[L.CLICKSET_HARMFUL]
 	local help = self.clicksets[L.CLICKSET_HELPFUL]
 
-    -- Since harm/help buttons take priority over any others, we can't
-    --
-    -- just apply the OOC set last.  Instead we use the self.ooc pseudo
-    -- set (which we build here) which contains only those help/harm
-    -- buttons that don't conflict with those defined in OOC.
+  -- Since harm/help buttons take priority over any others, we can't
+  --
+  -- just apply the OOC set last.  Instead we use the self.ooc pseudo
+  -- set (which we build here) which contains only those help/harm
+  -- buttons that don't conflict with those defined in OOC.
 
-    self.ooc = table.wipe(self.ooc or {})
+  self.ooc = table.wipe(self.ooc or {})
 
-    -- Create a hash map of the "taken" combinations
-    local takenBinds = {}
+  -- Create a hash map of the "taken" combinations
+  local takenBinds = {}
 
-    for name, entry in pairs(ooc) do
-        local key = string.format("%s:%s", entry.modifier, entry.button)
-        takenBinds[key] = true
-        table.insert(self.ooc, entry)
+  for name, entry in pairs(ooc) do
+    local key = string.format("%s:%s", entry.modifier, entry.button)
+    takenBinds[key] = true
+    table.insert(self.ooc, entry)
+  end
+
+  for name, entry in pairs(harm) do
+    local button = string.gsub(entry.button, "harmbutton", "")
+    local key = string.format("%s:%s", entry.modifier, button)
+    if not takenBinds[key] then
+      table.insert(self.ooc, entry)
     end
+  end
 
-    for name, entry in pairs(harm) do
-        local button = string.gsub(entry.button, "harmbutton", "")
-        local key = string.format("%s:%s", entry.modifier, button)
-        if not takenBinds[key] then
-            table.insert(self.ooc, entry)
-        end
+  for name, entry in pairs(help) do
+    local button = string.gsub(entry.button, "helpbutton", "")
+    local key = string.format("%s:%s", entry.modifier, button)
+    if not takenBinds[key] then
+      table.insert(self.ooc, entry)
     end
+  end
 
-    for name, entry in pairs(help) do
-        local button = string.gsub(entry.button, "helpbutton", "")
-        local key = string.format("%s:%s", entry.modifier, button)
-        if not takenBinds[key] then
-            table.insert(self.ooc, entry)
-        end
-    end
-	
-    self:UpdateTooltip()
+  self:UpdateTooltip()
 end
 
 function Clique:RegisterFrame(frame)
@@ -415,9 +416,9 @@ end
 
 function Clique:DONGLE_PROFILE_CHANGED(event, db, parent, svname, profileKey)
 	if db == self.db then
-        if not self.silentProfile then
-            self:PrintF(L.PROFILE_CHANGED, profileKey)
-        end
+    if not self.silentProfile then
+      self:PrintF(L.PROFILE_CHANGED, profileKey)
+    end
 
 		for name,set in pairs(self.clicksets) do
 			self:RemoveClickSet(set)
@@ -689,33 +690,29 @@ function Clique:AddTooltipLines()
 	-- Add a buffer line
 	GameTooltip:AddLine(" ")
 	if UnitAffectingCombat("player") then
+
 		if #tt_default ~= 0 then
 			GameTooltip:AddLine("Default bindings:")
-			for k,v in ipairs(tt_default) do
-				GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
-			end
+			for k,v in ipairs(tt_default)   do GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)  end
 		end
 
 		if #tt_help ~= 0 and not UnitCanAttack("player", "mouseover") then
 			GameTooltip:AddLine("Helpful bindings:")
-			for k,v in ipairs(tt_help) do
-				GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
-			end
+			for k,v in ipairs(tt_help)      do GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)  end
 		end
 
 		if #tt_harm ~= 0 and UnitCanAttack("player", "mouseover") then
 			GameTooltip:AddLine("Hostile bindings:")
-			for k,v in ipairs(tt_harm) do
-				GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
-			end
+			for k,v in ipairs(tt_harm)      do GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)  end
 		end
+
 	else
+
 		if #tt_ooc ~= 0 then
 			GameTooltip:AddLine("Out of combat bindings:")
-			for k,v in ipairs(tt_ooc) do
-				GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
-			end
+			for k,v in ipairs(tt_ooc)       do GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)  end
 		end
+
 	end
 end
 
@@ -743,8 +740,16 @@ function Clique:ShowBindings()
 		CliqueTooltip:EnableMouse()
 		CliqueTooltip:SetMovable()
 		CliqueTooltip:SetPadding(16)
-		CliqueTooltip:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
-		CliqueTooltip:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+		CliqueTooltip:SetBackdropBorderColor(
+      TOOLTIP_DEFAULT_COLOR.r, 
+      TOOLTIP_DEFAULT_COLOR.g, 
+      TOOLTIP_DEFAULT_COLOR.b
+    )
+		CliqueTooltip:SetBackdropColor(
+      TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, 
+      TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, 
+      TOOLTIP_DEFAULT_BACKGROUND_COLOR.b
+    )
 
 		CliqueTooltip:RegisterForDrag("LeftButton")
 		CliqueTooltip:SetScript("OnDragStart", function(self)
@@ -767,85 +772,77 @@ function Clique:ShowBindings()
 	if #tt_default > 0 then
 		CliqueTooltip:AddLine(" ")
 		CliqueTooltip:AddLine("Default bindings:")
-		for k,v in ipairs(tt_default) do
-			CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
-		end
+		for k,v in ipairs(tt_default)   do CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)  end
 	end
 
 	if #tt_help > 0 then
 		CliqueTooltip:AddLine(" ")
 		CliqueTooltip:AddLine("Helpful bindings:")
-		for k,v in ipairs(tt_help) do
-			CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
-		end
+		for k,v in ipairs(tt_help)      do CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)  end
 	end
 
 	if #tt_harm > 0 then
 		CliqueTooltip:AddLine(" ")
 		CliqueTooltip:AddLine("Hostile bindings:")
-		for k,v in ipairs(tt_harm) do
-			CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
-		end
+		for k,v in ipairs(tt_harm)      do CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)  end
 	end
 		
 	if #tt_ooc > 0 then
 		CliqueTooltip:AddLine(" ")
 		CliqueTooltip:AddLine("Out of combat bindings:")
-		for k,v in ipairs(tt_ooc) do
-			CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
-		end
+		for k,v in ipairs(tt_ooc)       do CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)  end
 	end
 
 	CliqueTooltip:Show()
 end
 
 function Clique:COMMENTATOR_SKIRMISH_QUEUE_REQUEST(event, typeName, newGroup)
-    if typeName ~= "ASCENSION_CA_SPECIALIZATION_ACTIVE_ID_CHANGED" then return end
+  if typeName ~= "ASCENSION_CA_SPECIALIZATION_ACTIVE_ID_CHANGED" then return end
 
-    if self.db.char.switchSpec then
-        self:Print("Detected a talent spec change, changing profile")
-        -- self:Print("Detected "..typeName..", changing profile to "..newGroup)
+  if self.db.char.switchSpec then
+    self:Print("Detected a talent spec change, changing profile")
+    -- self:Print("Detected "..typeName..", changing profile to "..newGroup)
 
-				newGroup = newGroup + 1
-				if self.db.char["spec"..newGroup.."Profile"] then
-					self.db:SetProfile(self.db.char["spec"..newGroup.."Profile"])
-				end
-
-        if CliqueFrame then
-            CliqueFrame.title:SetText("Clique v. " .. Clique.version .. " - " .. tostring(Clique.db.keys.profile));
-        end
+    newGroup = newGroup + 1
+    if self.db.char["spec"..newGroup.."Profile"] then
+      self.db:SetProfile(self.db.char["spec"..newGroup.."Profile"])
     end
+
+    if CliqueFrame then
+      CliqueFrame.title:SetText("Clique v. " .. Clique.version .. " - " .. tostring(Clique.db.keys.profile))
+    end
+  end
 end
 
 function Clique:SetClickType(frame)
-    local clickType = Clique.db.char.downClick and "AnyDown" or "AnyUp"
-    if frame then
+  local clickType = Clique.db.char.downClick and "AnyDown" or "AnyUp"
+  if frame then
+    frame:RegisterForClicks(clickType)
+  else
+    for frame, enabled in pairs(self.ccframes) do
+      if enabled then
         frame:RegisterForClicks(clickType)
-    else
-        for frame, enabled in pairs(self.ccframes) do
-            if enabled then
-                frame:RegisterForClicks(clickType)
-            end
-        end
+      end
     end
+  end
 end
 
 function Clique:EnableArenaFrames()
-    local arenaFrames = {
-        ArenaEnemyFrame1,
-        ArenaEnemyFrame2,
-        ArenaEnemyFrame3,
-        ArenaEnemyFrame4,
-        ArenaEnemyFrame5,
-    }
+  local arenaFrames = {
+    ArenaEnemyFrame1,
+    ArenaEnemyFrame2,
+    ArenaEnemyFrame3,
+    ArenaEnemyFrame4,
+    ArenaEnemyFrame5,
+  }
 
-    for idx,frame in ipairs(arenaFrames) do
-        rawset(self.ccframes, frame, true)
-    end
+  for idx,frame in ipairs(arenaFrames) do
+    rawset(self.ccframes, frame, true)
+  end
 end
 
 function Clique:ADDON_LOADED(event, addon)
-    if addon == "Blizzard_ArenaUI" then
-        self:EnableArenaFrames()
-    end
+  if addon == "Blizzard_ArenaUI" then
+    self:EnableArenaFrames()
+  end
 end
