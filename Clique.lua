@@ -134,7 +134,10 @@ end
 -- Each person who joins is appended as a new number. For example, a third person to join is CompactRaidFrame3 which wouldn't have existed in the initial reloadui.
 -- Once that person exists, then the CompactRaidFrame_ is populated and then any person can leave/join and be reassigned that slot, and Clique will work as-expected.
 
+
+
 -- /run CompactRaidFrameContainer:SetScale(1.6)
+CompactRaidFrameContainer:SetScale(1.6)
 
 
 
