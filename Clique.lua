@@ -92,6 +92,23 @@ function Clique:Enable()
 		if template == "RaidPulloutButtonTemplate" then
 			ClickCastFrames[getglobal(name.."ClearButton")] = true
 		end
+
+-- MY NEW CODE
+--function Clique:OnEvent( event )
+--  if event == "RAID_ROSTER_UPDATE" then
+--    CompactRaidFrameContainer:SetScale(1.6)
+--    self:EnableFrames()
+--  end
+--end
+--Clique:RegisterEvent( "RAID_ROSTER_UPDATE" )
+--Clique:SetScript( "OnEvent", Clique.OnEvent )
+
+    self:RegisterEvent( "RAID_ROSTER_UPDATE", "EnableFramesOnRaid" )
+    function Clique:EnableFramesOnRaid()
+      self:EnableFrames()
+    end
+
+
 	end
 
 	local oldotsu = GameTooltip:GetScript("OnTooltipSetUnit")
@@ -122,27 +139,12 @@ function Clique:Enable()
     if IsAddOnLoaded("Blizzard_ArenaUI") then
         self:EnableArenaFrames()
     end
+
+
 end
 
 
-
--- /run CompactRaidFrameContainer:Hide()
--- /run CompactRaidFrame2:Hide()
-
---		CompactRaidFrame2Container, CompactRaidFrame2Elements, CompactRaidFrame2HealthBar, CompactRaidFrame2PowerBar, 
---		CompactRaidFrame3Container, CompactRaidFrame3Elements, CompactRaidFrame3HealthBar, CompactRaidFrame3PowerBar, 
--- CompactRaidFrameContainerBorderFrame:Hide()
--- Must reloadui if raid size changes
--- Each person who joins is appended as a new number. For example, a third person to join is CompactRaidFrame3 which wouldn't have existed in the initial reloadui.
--- Once that person exists, then the CompactRaidFrame_ is populated and then any person can leave/join and be reassigned that slot, and Clique will work as-expected.
-
-
-
--- /run CompactRaidFrameContainer:SetScale(1.6)
-CompactRaidFrameContainer:SetScale(1.6)
-
-
-
+-- EDITED
 function Clique:EnableFrames()
     local tbl = {
 		PlayerFrame,
@@ -215,7 +217,28 @@ function Clique:EnableFrames()
     for i,frame in pairs(tbl) do
 		rawset(self.ccframes, frame, true)
     end
+    CompactRaidFrameContainer:SetScale(1.6)
 end	   
+
+
+
+-- /run CompactRaidFrameContainer:Hide()
+-- /run CompactRaidFrame2:Hide()
+
+--		CompactRaidFrame2Container, CompactRaidFrame2Elements, CompactRaidFrame2HealthBar, CompactRaidFrame2PowerBar, 
+--		CompactRaidFrame3Container, CompactRaidFrame3Elements, CompactRaidFrame3HealthBar, CompactRaidFrame3PowerBar, 
+-- CompactRaidFrameContainerBorderFrame:Hide()
+-- Must reloadui if raid size changes
+-- Each person who joins is appended as a new number. For example, a third person to join is CompactRaidFrame3 which wouldn't have existed in the initial reloadui.
+-- Once that person exists, then the CompactRaidFrame_ is populated and then any person can leave/join and be reassigned that slot, and Clique will work as-expected.
+
+
+
+-- /run CompactRaidFrameContainer:SetScale(1.6)
+-- TODO - create an onevent to 
+
+
+
 
 function Clique:SpellBookButtonPressed(frame, button)
     local texture = getglobal(frame:GetParent():GetName().."IconTexture"):GetTexture()
