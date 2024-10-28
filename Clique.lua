@@ -230,14 +230,14 @@ function Clique:SpellBookButtonPressed(frame, button)
     StaticPopup_Show( "CLIQUE_PASSIVE_SKILL" )
     return
   end
-  
+
   local type = "spell"
 
   if     self.editSet == self.clicksets[L.CLICKSET_HARMFUL]  then  button = string.format( "%s%d", "harmbutton", self:GetButtonNumber( button ) )
   elseif self.editSet == self.clicksets[L.CLICKSET_HELPFUL]  then  button = string.format( "%s%d", "helpbutton", self:GetButtonNumber( button ) )
   else                                                             button = self:GetButtonNumber( button )
   end
-   
+
   -- Clear the rank if "Show all spell ranks" is selected
   if not GetCVarBool( "ShowAllSpellRanks" ) then
     rank = nil
@@ -252,14 +252,14 @@ function Clique:SpellBookButtonPressed(frame, button)
     ["arg1"] = name,
     ["arg2"] = rank,
   }
-    
+
   local key = t.modifier .. t.button
-    
+
   if self:CheckBinding(key) then
     StaticPopup_Show( "CLIQUE_BINDING_PROBLEM" )
     return
   end
-    
+
   self.editSet[key] = t
   self:ListScrollUpdate()
   self:UpdateClicks()
@@ -370,7 +370,7 @@ function Clique:ApplyClickSet( name, frame )
     for modifier,entry in pairs( set ) do
       self:SetAction( entry )
     end
-  end          
+  end
 end
 
 
@@ -385,7 +385,7 @@ function Clique:RemoveClickSet( name, frame )
     for modifier,entry in pairs( set ) do
       self:DeleteAction( entry )
     end
-  end          
+  end
 end
 
 
@@ -414,7 +414,7 @@ function Clique:DONGLE_PROFILE_CHANGED( event, db, parent, svname, profileKey )
     self.clicksets = self.profile.clicksets
     self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
     self.profileKey = profileKey
-  
+
     -- Refresh the profile editor if it exists
     self.textlistSelected = nil
     self:TextListScrollUpdate()
@@ -453,7 +453,7 @@ end
 function Clique:DONGLE_PROFILE_DELETED( event, db, parent, svname, profileKey )
   if db == self.db then
     self:PrintF( L.PROFILE_DELETED, profileKey )
-  
+
     self.textlistSelected = nil
     self:TextListScrollUpdate()
     self:ListScrollUpdate()
@@ -673,7 +673,7 @@ function Clique:UpdateTooltip()
   table.sort( tt_help, sort )
 end  --  function Clique:UpdateTooltip()
 
-  
+
 function Clique:AddTooltipLines()
   if not self.profile.tooltips then return end
 
@@ -751,7 +751,7 @@ function Clique:ShowBindings()
   if not CliqueTooltip:IsShown() then
     CliqueTooltip:SetOwner( UIParent, "ANCHOR_PRESERVE" )
   end
-  
+
   -- Actually fill it with the bindings
   CliqueTooltip:SetText( "Clique Bindings" )
 
@@ -772,7 +772,7 @@ function Clique:ShowBindings()
     CliqueTooltip:AddLine( "Hostile bindings:" )
     for k,v in ipairs(tt_harm)      do  CliqueTooltip:AddDoubleLine( v.mod, v.action, 1, 1, 1, 1, 1, 1 )  end
   end
-    
+
   if #tt_ooc > 0 then
     CliqueTooltip:AddLine( " " )
     CliqueTooltip:AddLine( "Out of combat bindings:" )
