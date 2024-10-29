@@ -87,13 +87,15 @@ function Clique:Enable()
     self:RegisterFrame( frame )
   end
 
+-- The original code:
   -- Securehook CreateFrame to catch any new raid frames
-  local raidFunc = function( type, name, parent, template )
-    if template == "RaidPulloutButtonTemplate" then
-      ClickCastFrames[ getglobal( name.."ClearButton" ) ] = true
-    end
-  end
-  hooksecurefunc( "CreateFrame", raidFunc )
+--  local raidFunc = function( type, name, parent, template )
+--    if template == "RaidPulloutButtonTemplate" then
+--      ClickCastFrames[ getglobal( name.."ClearButton" ) ] = true
+--    end
+--  end
+--  hooksecurefunc( "CreateFrame", raidFunc )
+
 
   -- My code:  Raid support
   -- Previously:
@@ -102,7 +104,14 @@ function Clique:Enable()
   -- Once that person exists, then the CompactRaidFrame_ is populated and then any person can leave/join and be reassigned that slot, and Clique will work as-expected.
   self:RegisterEvent( "RAID_ROSTER_UPDATE" )
   function Clique:RAID_ROSTER_UPDATE(event, addon)
-    --self:Print( "Triggering Enable()" )
+    --self:Print( "RAID_ROSTER_UPDATE - triggering Enable()" )
+    self:Enable()
+  end
+
+  -- My code:  Raid-style party frames
+  self:RegisterEvent( "PARTY_UPDATE" )
+  function Clique:RAID_ROSTER_UPDATE(event, addon)
+    --self:Print( "PARTY_UPDATE - triggering Enable()" )
     self:Enable()
   end
 
@@ -214,6 +223,11 @@ function Clique:EnableFrames()
     CompactRaidFrame38,
     CompactRaidFrame39,
     CompactRaidFrame40,
+    CompactPartyFrameMember1,
+    CompactPartyFrameMember2,
+    CompactPartyFrameMember3,
+    CompactPartyFrameMember4,
+    CompactPartyFrameMember5,
   }
   for i,frame in pairs(tbl) do
     rawset(self.ccframes, frame, true)
