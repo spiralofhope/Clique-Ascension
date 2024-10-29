@@ -19,10 +19,10 @@ function Clique:Enable()
   self.defaults = {
     profile = {
       clicksets = {
-        [L.CLICKSET_DEFAULT] = {},
-        [L.CLICKSET_HARMFUL] = {},
-        [L.CLICKSET_HELPFUL] = {},
-        [L.CLICKSET_OOC] = {},
+        [ L.CLICKSET_DEFAULT ] = {},
+        [ L.CLICKSET_HARMFUL ] = {},
+        [ L.CLICKSET_HELPFUL ] = {},
+        [ L.CLICKSET_OOC ] = {},
       },
       blacklist = {
       },
@@ -33,12 +33,12 @@ function Clique:Enable()
       downClick = false,
     },
   }
-  
+
   self.db = self:InitializeDB( "CliqueDB", self.defaults )
   self.profile = self.db.profile
   self.clicksets = self.profile.clicksets
 
-  self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
+  self.editSet = self.clicksets[ L.CLICKSET_DEFAULT ]
 
   ClickCastFrames = ClickCastFrames or {}
   self.ccframes = ClickCastFrames
@@ -74,8 +74,8 @@ function Clique:Enable()
   if self.db.char.switchSpec then
     self.silentProfile = true
     self.talentGroup = CA_GetActiveSpecId() + 1
-    if self.db.char["spec"..self.talentGroup.."Profile"] then
-      self.db:SetProfile( self.db.char["spec"..self.talentGroup.."Profile"] )
+    if self.db.char[ "spec"..self.talentGroup.."Profile" ] then
+      self.db:SetProfile( self.db.char[ "spec"..self.talentGroup.."Profile" ] )
     end
     self.silentProfile = false
   end
@@ -90,7 +90,7 @@ function Clique:Enable()
   -- Securehook CreateFrame to catch any new raid frames
   local raidFunc = function( type, name, parent, template )
     if template == "RaidPulloutButtonTemplate" then
-      ClickCastFrames[getglobal( name.."ClearButton" )] = true
+      ClickCastFrames[ getglobal( name.."ClearButton" ) ] = true
     end
   end
   hooksecurefunc( "CreateFrame", raidFunc )
@@ -100,6 +100,7 @@ function Clique:Enable()
   function Clique:RAID_ROSTER_UPDATE(event, addon)
     self:Print( "Attempting to trigger Clique:EnableFrames()" )
     self:EnableFrames()
+    ClickCastFrames[ getglobal( name.."ClearButton" ) ] = true
   end
 
 -- Previously:
@@ -233,8 +234,8 @@ function Clique:SpellBookButtonPressed(frame, button)
 
   local type = "spell"
 
-  if     self.editSet == self.clicksets[L.CLICKSET_HARMFUL]  then  button = string.format( "%s%d", "harmbutton", self:GetButtonNumber( button ) )
-  elseif self.editSet == self.clicksets[L.CLICKSET_HELPFUL]  then  button = string.format( "%s%d", "helpbutton", self:GetButtonNumber( button ) )
+  if     self.editSet == self.clicksets[ L.CLICKSET_HARMFUL ]  then  button = string.format( "%s%d", "harmbutton", self:GetButtonNumber( button ) )
+  elseif self.editSet == self.clicksets[ L.CLICKSET_HELPFUL ]  then  button = string.format( "%s%d", "helpbutton", self:GetButtonNumber( button ) )
   else                                                             button = self:GetButtonNumber( button )
   end
 
@@ -245,12 +246,12 @@ function Clique:SpellBookButtonPressed(frame, button)
 
   -- Build the structure
   local t = {
-    ["button"] = button,
-    ["modifier"] = self:GetModifierText(),
-    ["texture"] = texture,
-    ["type"] = type,
-    ["arg1"] = name,
-    ["arg2"] = rank,
+    [ "button" ] = button,
+    [ "modifier" ] = self:GetModifierText(),
+    [ "texture" ] = texture,
+    [ "type" ] = type,
+    [ "arg1" ] = name,
+    [ "arg2" ] = rank,
   }
 
   local key = t.modifier .. t.button
@@ -260,7 +261,7 @@ function Clique:SpellBookButtonPressed(frame, button)
     return
   end
 
-  self.editSet[key] = t
+  self.editSet[ key ] = t
   self:ListScrollUpdate()
   self:UpdateClicks()
   -- We can only make changes when out of combat
@@ -287,9 +288,9 @@ end
 
 
 function Clique:UpdateClicks()
-  local ooc = self.clicksets[L.CLICKSET_OOC]
-  local harm = self.clicksets[L.CLICKSET_HARMFUL]
-  local help = self.clicksets[L.CLICKSET_HELPFUL]
+  local ooc  = self.clicksets[ L.CLICKSET_OOC ]
+  local harm = self.clicksets[ L.CLICKSET_HARMFUL ]
+  local help = self.clicksets[ L.CLICKSET_HELPFUL ]
 
   -- Since harm/help buttons take priority over any others, we can't
   --
@@ -304,14 +305,14 @@ function Clique:UpdateClicks()
 
   for name, entry in pairs( ooc ) do
     local key = string.format( "%s:%s", entry.modifier, entry.button )
-    takenBinds[key] = true
+    takenBinds[ key ] = true
     table.insert( self.ooc, entry )
   end
 
   for name, entry in pairs( harm ) do
     local button = string.gsub( entry.button, "harmbutton", "" )
     local key = string.format( "%s:%s", entry.modifier, button )
-    if not takenBinds[key] then
+    if not takenBinds[ key ] then
       table.insert( self.ooc, entry )
     end
   end
@@ -319,7 +320,7 @@ function Clique:UpdateClicks()
   for name, entry in pairs( help ) do
     local button = string.gsub( entry.button, "helpbutton", "" )
     local key = string.format( "%s:%s", entry.modifier, button )
-    if not takenBinds[key] then
+    if not takenBinds[ key ] then
       table.insert( self.ooc, entry )
     end
   end
@@ -331,12 +332,12 @@ end  --  function Clique:UpdateClicks()
 function Clique:RegisterFrame( frame )
   local name = frame:GetName()
 
-  if self.profile.blacklist[name] then 
+  if self.profile.blacklist[ name ] then 
     rawset( self.ccframes, frame, false )
     return 
   end
 
-  if not ClickCastFrames[frame] then 
+  if not ClickCastFrames[ frame ] then 
     rawset( self.ccframes, frame, true )
     if CliqueTextListFrame then
       Clique:TextListScrollUpdate()
@@ -360,7 +361,7 @@ end  --  function Clique:RegisterFrame(frame)
 
 
 function Clique:ApplyClickSet( name, frame )
-  local set = self.clicksets[name] or name
+  local set = self.clicksets[ name ] or name
 
   if frame then
     for modifier,entry in pairs( set ) do
@@ -375,7 +376,7 @@ end
 
 
 function Clique:RemoveClickSet( name, frame )
-  local set = self.clicksets[name] or name
+  local set = self.clicksets[ name ] or name
 
   if frame then
     for modifier,entry in pairs( set ) do
@@ -412,7 +413,7 @@ function Clique:DONGLE_PROFILE_CHANGED( event, db, parent, svname, profileKey )
 
     self.profile = self.db.profile
     self.clicksets = self.profile.clicksets
-    self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
+    self.editSet = self.clicksets[ L.CLICKSET_DEFAULT ]
     self.profileKey = profileKey
 
     -- Refresh the profile editor if it exists
@@ -435,7 +436,7 @@ function Clique:DONGLE_PROFILE_RESET( event, db, parent, svname, profileKey )
 
     self.profile = self.db.profile
     self.clicksets = self.profile.clicksets
-    self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
+    self.editSet = self.clicksets[ L.CLICKSET_DEFAULT ]
     self.profileKey = profileKey
   
     -- Refresh the profile editor if it exists
@@ -464,7 +465,7 @@ end
 function Clique:SetAttribute( entry, frame )
   local name = frame:GetName()
 
-  if  self.profile.blacklist and self.profile.blacklist[name] then
+  if  self.profile.blacklist and self.profile.blacklist[ name ] then
     return
   end
 
@@ -569,7 +570,7 @@ end  --  function Clique:SetAttribute( entry, frame )
 
 function Clique:DeleteAttribute( entry, frame )
   local name = frame:GetName()
-  if  self.profile.blacklist and self.profile.blacklist[name] then
+  if  self.profile.blacklist and self.profile.blacklist[ name ] then
     return
   end
 
@@ -622,14 +623,14 @@ local tt_default = {}
 
 function Clique:UpdateTooltip()
   local ooc = self.ooc
-  local default = self.clicksets[L.CLICKSET_DEFAULT]
-  local harm = self.clicksets[L.CLICKSET_HARMFUL]
-  local help = self.clicksets[L.CLICKSET_HELPFUL]
+  local default = self.clicksets[ L.CLICKSET_DEFAULT ]
+  local harm    = self.clicksets[ L.CLICKSET_HARMFUL ]
+  local help    = self.clicksets[ L.CLICKSET_HELPFUL ]
 
-  for k,v in pairs( tt_ooc     ) do tt_ooc[k]     = nil end
-  for k,v in pairs( tt_help    ) do tt_help[k]    = nil end
-  for k,v in pairs( tt_harm    ) do tt_harm[k]    = nil end
-  for k,v in pairs( tt_default ) do tt_default[k] = nil end
+  for k,v in pairs( tt_ooc     ) do tt_ooc[ k ]     = nil end
+  for k,v in pairs( tt_help    ) do tt_help[ k ]    = nil end
+  for k,v in pairs( tt_harm    ) do tt_harm[ k ]    = nil end
+  for k,v in pairs( tt_default ) do tt_default[ k ] = nil end
 
   -- Build the ooc lines, which includes both helpful and harmful
   for k,v in pairs( ooc ) do
@@ -679,7 +680,7 @@ function Clique:AddTooltipLines()
 
   local frame = GetMouseFocus()
   if not frame then return end
-  if not self.ccframes[frame] then return end
+  if not self.ccframes[ frame ] then return end
 
   -- Add a buffer line
   GameTooltip:AddLine( " " )
@@ -791,8 +792,8 @@ function Clique:COMMENTATOR_SKIRMISH_QUEUE_REQUEST( event, typeName, newGroup )
     -- self:Print( "Detected "..typeName..", changing profile to "..newGroup )
 
     newGroup = newGroup + 1
-    if self.db.char["spec"..newGroup.."Profile"] then
-      self.db:SetProfile(self.db.char["spec"..newGroup.."Profile"])
+    if self.db.char[ "spec"..newGroup.."Profile" ] then
+      self.db:SetProfile( self.db.char[ "spec"..newGroup.."Profile" ] )
     end
 
     if CliqueFrame then
