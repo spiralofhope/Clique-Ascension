@@ -96,17 +96,15 @@ function Clique:Enable()
   hooksecurefunc( "CreateFrame", raidFunc )
 
   -- My code:  Raid support
+  -- Previously:
+  -- Must reloadui if raid size changes
+  -- Each person who joins is appended as a new number. For example, a third person to join is CompactRaidFrame3 which wouldn't have existed in the initial reloadui.
+  -- Once that person exists, then the CompactRaidFrame_ is populated and then any person can leave/join and be reassigned that slot, and Clique will work as-expected.
   self:RegisterEvent( "RAID_ROSTER_UPDATE" )
   function Clique:RAID_ROSTER_UPDATE(event, addon)
-    self:Print( "Attempting to trigger Clique:EnableFrames()" )
-    self:EnableFrames()
-    ClickCastFrames[ getglobal( name.."ClearButton" ) ] = true
+    --self:Print( "Triggering Enable()" )
+    self:Enable()
   end
-
--- Previously:
--- Must reloadui if raid size changes
--- Each person who joins is appended as a new number. For example, a third person to join is CompactRaidFrame3 which wouldn't have existed in the initial reloadui.
--- Once that person exists, then the CompactRaidFrame_ is populated and then any person can leave/join and be reassigned that slot, and Clique will work as-expected.
 
 
   local oldotsu = GameTooltip:GetScript( "OnTooltipSetUnit" )
@@ -141,14 +139,15 @@ end  --  function Clique:Enable()
 
 -- EDITED
 function Clique:EnableFrames()
-  self:Print( "triggered Clique:EnableFrames()" )
+  --self:Print( "triggered Clique:EnableFrames()" )
+  -- My preference:
   CompactRaidFrameContainer:SetScale( 1.5 )
-  -- CompactRaidFrameContainer:Hide()
-  -- CompactRaidFrame2:Hide()
-  -- CompactRaidFrameContainerBorderFrame:Hide()
-  -- Other notable frames:
-  --    CompactRaidFrame2Container, CompactRaidFrame2Elements, CompactRaidFrame2HealthBar, CompactRaidFrame2PowerBar, 
-  --    CompactRaidFrame3Container, CompactRaidFrame3Elements, CompactRaidFrame3HealthBar, CompactRaidFrame3PowerBar, 
+  -- Other notable frames related to raiding, but which don't seem to matter:
+  --   CompactRaidFrameContainer:Hide()
+  --   CompactRaidFrame2:Hide()
+  --   CompactRaidFrameContainerBorderFrame:Hide()
+  -- Still more notable frames:
+  --   CompactRaidFrame2Container, CompactRaidFrame2Elements, CompactRaidFrame2HealthBar, CompactRaidFrame2PowerBar, 
   local tbl = {
     PlayerFrame,
     PetFrame,
