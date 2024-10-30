@@ -1,0 +1,5 @@
+- Instructions for manually installing.
+- License
+- Rename this to `Clique-Ascension` so it appears as its own AddOn.
+- Scale configuration functionality.
+  - Steal the configuration panel from TidyBar.
